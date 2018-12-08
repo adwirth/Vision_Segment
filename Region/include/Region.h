@@ -1,31 +1,17 @@
 #pragma once
 
-#include <stack>
 #include <opencv2/opencv.hpp>
 
 class Region
 {
 public:
 
-    enum ImageType 
-    {
-        RegionImage,
-        PerimeterImage
-    };
+    Region();
 
-    Region(const cv::Mat &imgIn);
 
-    void UpdateInputImage(const cv::Mat &imgIn);
+    cv::Mat FindRegion(const cv::Mat &imgIn, const cv::Point location);
 
-    void FindRegion(const cv::Point location);
-
-    void DisplayImage();
-
-    cv::Point DisplayImageSelectPixel();
-    
-    void DisplayPixels(ImageType type);
-
-    void SavePixels(ImageType type, std::string outputPath);
+    cv::Mat FindPerimeter(const cv::Mat &regionIn);
 
 private:
 
@@ -37,14 +23,7 @@ private:
     const double m_MinRegionAreaFactor;
     // offsets of the neighbours
     cv::Point m_PointShift2D[8];
-
-    // The input image 
-    cv::Mat m_SourceImg;
-    // The region image 
-    cv::Mat m_RegionImg;
-    // The perimeter image 
-    cv::Mat m_PerimeterImg;
-
-	double Region::distanceAngle(const cv::Vec3b p1, const cv::Vec3b p2);
-
+double distanceAngle(const cv::Vec3b p1, const cv::Vec3b p2);
+	cv::Point nearestNeighbor(const cv::Mat& img, const cv::Point p);
+	double distanceEuc(const cv::Vec3b p1b, const cv::Vec3b p2b);
 };

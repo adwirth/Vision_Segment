@@ -1,13 +1,16 @@
 #include "cmdparser.hpp"
-#include "Region.h"
+#include "RegionProcess.h"
+#include "RegionIO.h"
 
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 
 void configure_parser(cli::Parser& parser) 
 {
-    parser.set_required<std::string>("i", "output", "data", "Strings are naturally included.");
-    parser.set_required<std::string>("o", "output", "data", "Strings are naturally included.");
+    parser.set_required<std::string>("i", "output", "", "Strings are naturally included.");
+    parser.set_required<std::string>("r", "output", "", "Strings are naturally included.");
+    parser.set_optional<std::string>("p", "output", "", "Strings are naturally included.");
+    parser.set_optional<std::vector<int>>("l", "values", std::vector<int>{}, "The input pixel for region searching");
     //parser.set_optional<int>("n", "number", 8, "Integers in all forms, e.g., unsigned int, long long, ..., are possible. Hexadecimal and Ocatl numbers parsed as well");
     //parser.set_optional<cli::NumericalBase<int, 10>>("t", "temp", 0, "integer parsing restricted only to numerical base 10");
     //parser.set_optional<double>("b", "beta", 11.0, "Also floating point values are possible.");
@@ -23,27 +26,23 @@ int main(int argc, char *argv[])
 
 
     auto inputPath  = parser.get<std::string>("i");
-    auto outputPath = parser.get<std::string>("o");
+    auto outputRegionPath = parser.get<std::string>("r");
+    auto outputPerimeterPath = parser.get<std::string>("p");
+    std::vector<int> location = parser.get<std::vector<int>>("l");
 
     cv::Mat image;
-    image = cv::imread(inputPath, 1);
+    image = RegionIO::LoadPixels(inputPath);
 
-    // Image load
-    if (!image.data)
+    RegionProcess region;
+
+    cv::Point point;
+    if (location.size() == 2)
     {
-        printf("No image data (warning: OpenCV recognize files by extensions)\n");
-        return -1;
+        point.x = location[0];
+        point.y = location[1];
     }
 
-    Region region(image);
-
-    cv::Point point = region.DisplayImageSelectPixel();
-
-    region.FindRegion(point);
-
-    region.DisplayPixels(Region::ImageType::RegionImage);
-
-    region.SavePixels(Region::ImageType::RegionImage,outputPath);
+    region.Run(image, point, outputRegionPath, outputPerimeterPath);
 
     return 0;
 }
