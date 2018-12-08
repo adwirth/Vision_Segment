@@ -17,10 +17,10 @@
 
 void configure_parser(cli::Parser& parser) 
 {
-    parser.set_required<std::string>("i", "input", "", "Path");
-    parser.set_required<std::string>("r", "region", "", "Path");
-    parser.set_optional<std::string>("p", "perimeter", "", "Path");
-    parser.set_optional<std::vector<int>>("l", "values", std::vector<int>{}, "The input pixel for region searching");
+	parser.set_required<std::string>("i", "input", "", "Path");
+	parser.set_required<std::string>("r", "region", "", "Path");
+	parser.set_optional<std::string>("p", "perimeter", "", "Path");
+	parser.set_optional<std::vector<int>>("l", "values", std::vector<int>{}, "The input pixel for region searching");
 	parser.set_optional<double>("t1", "threshold1", 0.0008, "Threshold1");
 	parser.set_optional<double>("t2", "threshold2", 0.025, "Threshold2");
 	parser.set_optional<double>("al", "alpha", 0.5, "Alpha");
@@ -29,22 +29,22 @@ void configure_parser(cli::Parser& parser)
 
 int main(int argc, char *argv[])
 {
-    cli::Parser parser(argc, argv);
-    configure_parser(parser);
-    parser.run_and_exit_if_error();
+	cli::Parser parser(argc, argv);
+	configure_parser(parser);
+	parser.run_and_exit_if_error();
 
 
-    auto inputPath  = parser.get<std::string>("i");
-    auto outputRegionPath = parser.get<std::string>("r");
-    auto outputPerimeterPath = parser.get<std::string>("p");
-    std::vector<int> location = parser.get<std::vector<int>>("l");
+	auto inputPath  = parser.get<std::string>("i");
+	auto outputRegionPath = parser.get<std::string>("r");
+	auto outputPerimeterPath = parser.get<std::string>("p");
+	std::vector<int> location = parser.get<std::vector<int>>("l");
 	double threshold1 = parser.get<double>("t1");
 	double threshold2 = parser.get<double>("t2");
 	double alpha = parser.get<double>("al");
 	int maxdimension = parser.get<int>("dim");
 	
 
-    cv::Mat image;
+	cv::Mat image;
 	try
 	{
 		image = RegionIO::LoadPixels(inputPath);
@@ -55,17 +55,17 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 	
-    RegionProcess region(threshold1, threshold2, alpha, maxdimension);
+	RegionProcess region(threshold1, threshold2, alpha, maxdimension);
 
-    cv::Point point;
-    if (location.size() == 2)
-    {
-        point.x = location[0];
-        point.y = location[1];
-    }
+	cv::Point point;
+	if (location.size() == 2)
+	{
+		point.x = location[0];
+		point.y = location[1];
+	}
 
-    region.Run(image, point, outputRegionPath, outputPerimeterPath);
+	region.Run(image, point, outputRegionPath, outputPerimeterPath);
 
-    return 0;
+	return 0;
 }
 

@@ -15,7 +15,7 @@
 
 namespace RegionUI
 {
-    void DisplayImage(cv::Mat image, std::string windowName);
+	void DisplayImage(cv::Mat image, std::string windowName);
 
-    cv::Point DisplayImageSelectPixel(cv::Mat image, std::string windowName);
+	cv::Point DisplayImageSelectPixel(cv::Mat image, std::string windowName);
 };

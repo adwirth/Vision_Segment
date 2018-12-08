@@ -20,11 +20,11 @@ public:
 
 	RegionProcess(double aThreshold, double aThreshold2, double aAlpha, int aMaxDimension);
 
-    void Run(const cv::Mat& imgIn,
-             const cv::Point location,
-             std::string outputRegionPath,
-             std::string outputPerimeterPath);
+	void Run(const cv::Mat& imgIn,
+			 const cv::Point location,
+			 std::string outputRegionPath,
+			 std::string outputPerimeterPath);
 
 private:
-    Region m_Region;
+	Region m_Region;
 };

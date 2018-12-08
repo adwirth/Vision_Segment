@@ -15,7 +15,7 @@
 
 namespace RegionIO
 {
-    cv::Mat LoadPixels(std::string inputPath);
+	cv::Mat LoadPixels(std::string inputPath);
 
-    void SavePixels(const cv::Mat& image, std::string outputPath);
+	void SavePixels(const cv::Mat& image, std::string outputPath);
 };
