@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 2.8)
+project( Region )
+find_package( OpenCV REQUIRED )
+file(GLOB SOURCES "Region/source/*.cpp")
+add_executable( Region ${SOURCES} )
+target_link_libraries( Region ${OpenCV_LIBS} )
+target_include_directories( Region PRIVATE  "Region/include" )
+
