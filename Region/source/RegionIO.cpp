@@ -1,3 +1,13 @@
+/*!
+ * \file
+ * Member function definitions of RegionIO class. This file is part of Region module.
+  *
+ * \remarks
+ *
+ * \authors
+ * Andras Wirth
+ */
+
 #include "RegionIO.h"
 
 cv::Mat RegionIO::LoadPixels(std::string inputPath)

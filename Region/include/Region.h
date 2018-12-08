@@ -1,3 +1,16 @@
+/*!
+ * \file
+ * Region class definition. This file is part of Region module.
+ * Region class performs a region of the image and calculates its edge.
+ *
+ * \remarks
+ * Original region grow algorithm by LogM.
+ * https://github.com/imLogM/multi_seed_region_grow
+ *
+ * \authors
+ * Andras Wirth
+ */
+
 #pragma once
 
 #include <opencv2/opencv.hpp>

@@ -1,3 +1,15 @@
+/*!
+ * \file
+ * Member function definitions of Region class. This file is part of Region module.
+ *
+ * \remarks
+ * Original region grow algorithm by LogM.
+ * https://github.com/imLogM/multi_seed_region_grow
+ *
+ * \authors
+ * Andras Wirth
+ */
+
 #include "Region.h"
 #include <stack>
 
@@ -65,7 +77,7 @@ void Region::Grow(const cv::Mat& src, cv::Mat& dest, cv::Mat& mask, cv::Point se
 					mask.at<uchar>(estimating_point) = 1;
 					point_stack.push(estimating_point);
 					pAverage += cv::Vec3d(p2);
-					int pS = point_stack.size() + 1;
+					int pS = (int)point_stack.size() + 1;
 					norm += 1. / sqrt((seed.x - estimating_point.x) * (seed.x - estimating_point.x) + (seed.y - estimating_point.y) * (seed.y - estimating_point.y));
 					pA = cv::Vec3d(pAverage[0] / norm, pAverage[1] / norm, pAverage[2] / norm);
 

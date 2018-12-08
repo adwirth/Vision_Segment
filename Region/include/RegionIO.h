@@ -1,3 +1,14 @@
+/*!
+ * \file
+ * RegionIO class definition. This file is part of Region module.
+ * The RegionIO class performs data IO tasks.
+ *
+ * \remarks
+ *
+ * \authors
+ * Andras Wirth
+ */
+
 #pragma once
 
 #include <opencv2/opencv.hpp>

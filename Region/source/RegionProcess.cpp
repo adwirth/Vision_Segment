@@ -1,3 +1,13 @@
+/*!
+ * \file
+ * Member function definitions of RegionProcess class. This file is part of Region module.
+  *
+ * \remarks
+ *
+ * \authors
+ * Andras Wirth
+ */
+
 #include "RegionProcess.h"
 #include "RegionUI.h"
 #include "RegionIO.h"

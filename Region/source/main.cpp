@@ -1,3 +1,13 @@
+/*!
+ * \file
+ * Main function of the Region module.
+ *
+ * \remarks
+ *
+ * \authors
+ * Andras Wirth
+ */
+
 #include "cmdparser.hpp"
 #include "RegionProcess.h"
 #include "RegionIO.h"

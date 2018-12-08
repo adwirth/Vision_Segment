@@ -1,11 +1,17 @@
-#pragma once
-
-//https://github.com/FlorianRappl/CmdParser
-
-/*
-This file is part of the C++ CmdParser utility.
-Copyright (c) 2015 - 2016 Florian Rappl
-*/
+/*!
+ * \file
+ * Parser class definition. This file is part of Region module.
+ * The Parser class performs command line parsing operations.
+ *
+ * \remarks
+ * Original source code by Florian Rappl
+ * https://github.com/FlorianRappl/CmdParser
+ * This file is part of the C++ CmdParser utility.
+ * Copyright (c) 2015 - 2016 Florian Rappl
+ *
+ * \authors
+ * Andras Wirth
+ */
 
 #pragma once
 #include <iostream>
@@ -293,7 +299,7 @@ public:
     }
 
     ~Parser() {
-        for (int i = 0, n = _commands.size(); i < n; ++i) {
+        for (int i = 0, n = (int)_commands.size(); i < n; ++i) {
             delete _commands[i];
         }
     }
@@ -369,7 +375,7 @@ public:
         if (_arguments.size() > 0) {
             auto current = find_default();
 
-            for (int i = 0, n = _arguments.size(); i < n; ++i) {
+            for (int i = 0, n = (int)_arguments.size(); i < n; ++i) {
                 auto isarg = _arguments[i].size() > 0 && _arguments[i][0] == '-';
                 auto associated = isarg ? find(_arguments[i]) : nullptr;
 

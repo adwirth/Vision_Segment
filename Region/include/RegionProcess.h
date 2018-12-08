@@ -1,3 +1,15 @@
+/*!
+ * \file
+ * RegionProcess class definition. This file is part of Region module.
+ * The RegionProcess class executes the region segmentation and edge detection tasks.
+ *
+ * \remarks
+ *
+ * \authors
+ * Andras Wirth
+ */
+
+
 #pragma once
 
 #include "Region.h"

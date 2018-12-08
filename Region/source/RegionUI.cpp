@@ -1,3 +1,13 @@
+/*!
+ * \file
+ * Member function definitions of RegionUI class. This file is part of Region module.
+ *
+ * \remarks
+ *
+ * \authors
+ * Andras Wirth
+ */
+
 #include "RegionUI.h"
 
 void RegionUI::DisplayImage(cv::Mat image, std::string windowName)
