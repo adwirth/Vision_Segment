@@ -19,7 +19,7 @@ cv::Mat RegionIO::LoadPixels(std::string inputPath)
     if (!image.data)
     {
         std::string errorMSG( inputPath + " file corrupt.\n No image data (warning: OpenCV recognize files by extensions)\n");
-        std::exception(errorMSG.c_str());
+        throw std::exception(errorMSG.c_str());
     }
     return image;
 }
@@ -28,7 +28,7 @@ void RegionIO::SavePixels(const cv::Mat& image, std::string outputPath)
 {
     if( !image.data || image.empty() )
     {
-        std::exception("No image data\n");
+        throw std::exception("No image data\n");
     }
     imwrite(outputPath, image);
 }

@@ -17,15 +17,14 @@
 
 void configure_parser(cli::Parser& parser) 
 {
-    parser.set_required<std::string>("i", "output", "", "Strings are naturally included.");
-    parser.set_required<std::string>("r", "output", "", "Strings are naturally included.");
-    parser.set_optional<std::string>("p", "output", "", "Strings are naturally included.");
+    parser.set_required<std::string>("i", "input", "", "Path");
+    parser.set_required<std::string>("r", "region", "", "Path");
+    parser.set_optional<std::string>("p", "perimeter", "", "Path");
     parser.set_optional<std::vector<int>>("l", "values", std::vector<int>{}, "The input pixel for region searching");
-    //parser.set_optional<int>("n", "number", 8, "Integers in all forms, e.g., unsigned int, long long, ..., are possible. Hexadecimal and Ocatl numbers parsed as well");
-    //parser.set_optional<cli::NumericalBase<int, 10>>("t", "temp", 0, "integer parsing restricted only to numerical base 10");
-    //parser.set_optional<double>("b", "beta", 11.0, "Also floating point values are possible.");
-    //parser.set_optional<bool>("a", "all", false, "Boolean arguments are simply switched when encountered, i.e. false to true if provided.");
-    //parser.set_required<std::vector<short>>("v", "values", "By using a vector it is possible to receive a multitude of inputs.");
+	parser.set_optional<double>("t1", "threshold1", 0.0008, "Threshold1");
+	parser.set_optional<double>("t2", "threshold2", 0.025, "Threshold2");
+	parser.set_optional<double>("al", "alpha", 0.5, "Alpha");
+	parser.set_optional<int>("dim", "maxdimension", 100, "Downscale image to this dimension");
 }
 
 int main(int argc, char *argv[])
@@ -39,11 +38,24 @@ int main(int argc, char *argv[])
     auto outputRegionPath = parser.get<std::string>("r");
     auto outputPerimeterPath = parser.get<std::string>("p");
     std::vector<int> location = parser.get<std::vector<int>>("l");
+	double threshold1 = parser.get<double>("t1");
+	double threshold2 = parser.get<double>("t2");
+	double alpha = parser.get<double>("al");
+	int maxdimension = parser.get<int>("dim");
+	
 
     cv::Mat image;
-    image = RegionIO::LoadPixels(inputPath);
-
-    RegionProcess region;
+	try
+	{
+		image = RegionIO::LoadPixels(inputPath);
+	}
+	catch (std::exception e)
+	{
+		std::cout << "Unable to load image" << "\n" << e.what();
+		exit(1);
+	}
+	
+    RegionProcess region(threshold1, threshold2, alpha, maxdimension);
 
     cv::Point point;
     if (location.size() == 2)

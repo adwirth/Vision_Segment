@@ -14,3 +14,8 @@ https://uwspace.uwaterloo.ca/bitstream/handle/10012/937/swesolko1999.pdf?sequenc
 https://github.com/imLogM/multi_seed_region_grow
 * Command line parser by Florian Rappl
 https://github.com/FlorianRappl/CmdParser
+
+## Example commandlines:
+-i images/test2.png -r images/test2r.png -p images/test2o.png -t1 0.001 -t2 0.032 -dim 100 -al 0.5
+-i images/test4.jpg -r images/test4r.jpg -p images/test4o.jpg -t1 0.001 -t2 0.032 -dim 100 -al 0.5
+-i images/yesthisfileiscorrupt.png -r images/test4r.jpg -p images/test4o.jpg -t1 0.001 -t2 0.032 -dim 100 -al 0.5
