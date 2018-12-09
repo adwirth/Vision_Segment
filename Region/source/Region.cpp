@@ -242,19 +242,46 @@ cv::Mat Region::findPerimeter(const cv::Mat &regionIn, std::vector<std::pair<int
 
 void Region::smoothPerimeter(std::vector<std::pair<int, int>>& edgePoints)
 {
-	Curve* curve = new Bezier();
+	std::vector<std::pair<int, int>> edgePointsSmooth;
 
-	for (auto it = edgePoints.begin(); it != edgePoints.end(); ++it)
+	for (int i = 0; i < edgePoints.size(); ++i)
+	{
+		double xS = 0., yS = 0., w = 0.;
+		for (int k = -10; k <= 10; ++k)
+		{ 
+			int index = i + k;
+			if (index < 0)
+			{
+				index = index + edgePoints.size();
+
+			}
+			else if (index >= edgePoints.size())
+			{
+				index -= edgePoints.size();
+			}
+			xS += edgePoints[index].first;
+			yS += edgePoints[index].second;
+			w += 1.;
+		}
+		edgePointsSmooth.push_back(std::pair<int, int>((int)(xS / w), int(yS / w)));
+	}
+
+	Curve* curve = new Bezier();
+	curve->set_steps(100);
+
+	for (auto it = edgePointsSmooth.begin(); it != edgePointsSmooth.end(); ++it)
 	{
 		curve->add_way_point(Vector(it->first, it->second, 0));
 	}
+	curve->add_way_point(Vector(edgePointsSmooth.begin()->first, edgePointsSmooth.begin()->second, 0));
 
 	edgePoints.clear();
 
 	//std::cout << "nodes: " << curve->node_count() << std::endl;
 	//std::cout << "total length: " << curve->total_length() << std::endl;
 		
-	for (int i = 0; i < curve->node_count(); ++i) {
+	for (int i = 0; i < curve->node_count(); ++i)
+	{
 		//std::cout << "node #" << i << ": " << curve->node(i).toString() << " (length so far: " << curve->length_from_starting_point(i) << ")" << std::endl;
 		edgePoints.push_back(std::pair<int, int>((int)curve->node(i).x, (int)curve->node(i).y));
 	}

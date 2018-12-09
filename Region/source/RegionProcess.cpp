@@ -12,10 +12,11 @@
 #include "RegionUI.h"
 #include "RegionIO.h"
 
-RegionProcess::RegionProcess(double aThreshold, double aThreshold2, double aAlpha, int aMaxDimension, bool enableUI):
+RegionProcess::RegionProcess(double aThreshold, double aThreshold2, double aAlpha, int aMaxDimension, bool enableUI, bool aSmoothEdge):
 	m_Region(aThreshold, aThreshold2, aAlpha),
 	m_MaxDimension(aMaxDimension),
-	m_RegionUI(enableUI)
+	m_RegionUI(enableUI),
+	m_SmoothEdge(aSmoothEdge)
 {
 }
 
@@ -67,13 +68,16 @@ std::tuple<cv::Mat, std::vector<std::pair<int, int>>, cv::Mat> RegionProcess::Ru
 		cv::resize(perimeterImage, perimeterImage, cv::Size(0, 0), scaleB, scaleB);
 		for (auto it = edgePoints.begin(); it != edgePoints.end(); ++it)
 		{
-			it->first *= scaleB;
-			it->second *= scaleB;
+			it->first = int(it->first * scaleB);
+			it->second = int(it->second * scaleB);
 		}
 	}
 
 	// Smooth perimeter
-	m_Region.smoothPerimeter(edgePoints);
+	if (m_SmoothEdge)
+	{
+		m_Region.smoothPerimeter(edgePoints);
+	}
 
 	// Displaying results
 	m_RegionUI.DisplayImage(regionImg, "Region");
