@@ -26,9 +26,23 @@ cv::Mat RegionIO::LoadPixels(std::string inputPath)
 
 void RegionIO::SavePixels(const cv::Mat& image, std::string outputPath)
 {
-	if( !image.data || image.empty() )
+	if (!image.data || image.empty())
 	{
 		throw std::exception("No image data\n");
+	}
+	imwrite(outputPath, image);
+}
+
+void RegionIO::SaveVectorToText(const std::vector<std::pair<int, int>>& edgePoints, std::string outputPath)
+{
+}
+
+void RegionIO::SaveVectorToImage(const std::vector<std::pair<int, int>>& edgePoints, int cols, int rows, std::string outputPath)
+{
+	cv::Mat image(rows, cols, CV_8UC3, cv::Scalar(0, 0, 0));
+	for (auto it = edgePoints.begin(); it != edgePoints.end(); ++it)
+	{
+		image.at<cv::Vec3b>(cv::Point((*it).first, (*it).second)) = cv::Vec3b(255,255,255);
 	}
 	imwrite(outputPath, image);
 }

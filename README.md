@@ -19,3 +19,16 @@ https://github.com/FlorianRappl/CmdParser
 -i images/test2.png -r images/test2r.png -p images/test2o.png -t1 0.001 -t2 0.032 -dim 100 -al 0.5
 -i images/test4.jpg -r images/test4r.jpg -p images/test4o.jpg -t1 0.001 -t2 0.032 -dim 100 -al 0.5
 -i images/yesthisfileiscorrupt.png -r images/test4r.jpg -p images/test4o.jpg -t1 0.001 -t2 0.032 -dim 100 -al 0.5
+
+## Algorithm notes
+* Region grow could easily provide the perimeter too, but that would compromise modularity: in case of using other region segmentation methods (like clustering) we would still need a separate edge detection method.
+*
+
+## TODO
+* Smooth image before segmentation
+* Adjust contrast before segmentation
+* Edge detection
+* Test cases
+* Error handling
+* Algorithm description
+* Test build on Linux

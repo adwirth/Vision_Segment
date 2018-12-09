@@ -12,10 +12,14 @@
 #pragma once
 
 #include <opencv2/opencv.hpp>
+#include <vector>
 
 namespace RegionIO
 {
 	cv::Mat LoadPixels(std::string inputPath);
 
 	void SavePixels(const cv::Mat& image, std::string outputPath);
+
+	void SaveVectorToText(const std::vector<std::pair<int,int>>& edgePoints, std::string outputPath);
+	void SaveVectorToImage(const std::vector<std::pair<int, int>>& edgePoints, int cols, int rows, std::string outputPath);
 };

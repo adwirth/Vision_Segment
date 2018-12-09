@@ -27,4 +27,5 @@ public:
 
 private:
 	Region m_Region;
+	const double m_MaxDimension;			//!< Maximum image dimension
 };

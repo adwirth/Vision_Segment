@@ -11,13 +11,13 @@
  */
 
 #include "Region.h"
+#include "Bezier.h"
 #include <stack>
 
-Region::Region( double aThreshold, double aThreshold2, double aAlpha, int aMaxDimension ):
+Region::Region( double aThreshold, double aThreshold2, double aAlpha ):
 	m_Threshold(aThreshold),
 	m_Threshold2(aThreshold2),
 	m_Alpha(aAlpha),
-	m_MaxDimension(aMaxDimension),
 	m_MinRegionAreaFactor(0.01)
 {
 	// Neighboring pixel coordinates
@@ -29,6 +29,11 @@ Region::Region( double aThreshold, double aThreshold2, double aAlpha, int aMaxDi
 	m_PointShift2D[5] = cv::Point(-1, 1);
 	m_PointShift2D[6] = cv::Point(0, 1);
 	m_PointShift2D[7] = cv::Point(1, 1);
+}
+
+bool Region::isPixelInImage(const cv::Mat& src, cv::Point pixel)
+{
+	return 0 <= pixel.x && pixel.x < src.cols && 0 <= pixel.y && pixel.y < src.rows;
 }
 
 void Region::grow(const cv::Mat& src, cv::Mat& dest, cv::Mat& mask, cv::Point seed)
@@ -47,13 +52,10 @@ void Region::grow(const cv::Mat& src, cv::Mat& dest, cv::Mat& mask, cv::Point se
 		// Iterating through neighboring pixels
 		for (int i = 0; i<8; ++i)
 		{
-			cv::Point estimating_point = center + m_PointShift2D[i];
+			cv::Point estimatingPoint = center + m_PointShift2D[i];
 
 			// Check if inside the image
-			if (estimating_point.x < 0
-				|| estimating_point.x > src.cols - 1
-				|| estimating_point.y < 0
-				|| estimating_point.y > src.rows - 1)
+			if ( !isPixelInImage( src, estimatingPoint) )
 			{
 				// estimating_point should not out of the range in image
 				continue;
@@ -62,7 +64,7 @@ void Region::grow(const cv::Mat& src, cv::Mat& dest, cv::Mat& mask, cv::Point se
 			{
 				// Getting pixel values
 				cv::Vec3b p1 = src.at<cv::Vec3b>(center);
-				cv::Vec3b p2 = src.at<cv::Vec3b>(estimating_point);
+				cv::Vec3b p2 = src.at<cv::Vec3b>(estimatingPoint);
 				cv::Vec3b pavg = avgColor(src, mask, center, 15);
 
 				// Calculating distance measures
@@ -72,12 +74,12 @@ void Region::grow(const cv::Mat& src, cv::Mat& dest, cv::Mat& mask, cv::Point se
 				double l = 1 - pow(abs( lightness(p1) - 0.5 ) * 2, 2);
 
 				// Adding matching pixels to mask and stack
-				if (dest.at<uchar>(estimating_point) == 0
-					&& mask.at<uchar>(estimating_point) == 0
+				if (dest.at<uchar>(estimatingPoint) == 0
+					&& mask.at<uchar>(estimatingPoint) == 0
 					&& (l * ((1- m_Alpha) * delta + m_Alpha * delta2 - m_Threshold)  + (1 - l) * ( delta3 - m_Threshold2) ) < 0. )
 				{
-					mask.at<uchar>(estimating_point) = 1;
-					point_stack.push(estimating_point);
+					mask.at<uchar>(estimatingPoint) = 1;
+					point_stack.push(estimatingPoint);
 				}
 			}
 		}
@@ -95,18 +97,13 @@ cv::Vec3b Region::avgColor(const cv::Mat &imgIn, const cv::Mat& mask, const cv::
 	{
 		for (int j = -limit; j <= limit; ++j)
 		{
-			cv::Point estimating_point = location + cv::Point(i, j);
+			cv::Point estimatingPoint = location + cv::Point(i, j);
 
 			// Check if inside the image
-			if (!(estimating_point.x < 0
-				|| estimating_point.x > imgIn.cols - 1
-				|| estimating_point.y < 0
-				|| estimating_point.y > imgIn.rows - 1)
-				&&
-				(mask.at<uchar>(estimating_point) == 1))
+			if ( isPixelInImage(imgIn, estimatingPoint) && (mask.at<uchar>(estimatingPoint) == 1) )
 			{
 				// Weighted summation of pixel values
-				double w = 1. / (1. + pow((location.x - estimating_point.x) * (location.x - estimating_point.x) + (location.y - estimating_point.y) * (location.y - estimating_point.y),0.3));
+				double w = 1. / (1. + pow((location.x - estimatingPoint.x) * (location.x - estimatingPoint.x) + (location.y - estimatingPoint.y) * (location.y - estimatingPoint.y),0.3));
 				pAverage += cv::Vec3d(imgIn.at<cv::Vec3b>(location)[0] * w, imgIn.at<cv::Vec3b>(location)[1] * w, imgIn.at<cv::Vec3b>(location)[2] * w );
 				norm += w;
 			}
@@ -117,7 +114,7 @@ cv::Vec3b Region::avgColor(const cv::Mat &imgIn, const cv::Mat& mask, const cv::
 	return cv::Vec3d(pAverage[0] / norm, pAverage[1] / norm, pAverage[2] / norm);
 }
 
-cv::Mat Region::FindRegion(const cv::Mat &imgIn, const cv::Point location)
+cv::Mat Region::findRegion(const cv::Mat &imgIn, const cv::Point location)
 {
 	int minRegionArea = int(m_MinRegionAreaFactor * imgIn.cols * imgIn.rows);
 
@@ -145,10 +142,11 @@ cv::Mat Region::FindRegion(const cv::Mat &imgIn, const cv::Point location)
 	return regionImg;
 }
 
-cv::Mat Region::FindPerimeter(const cv::Mat &regionIn)
+cv::Mat Region::findPerimeter(const cv::Mat &regionIn, std::vector<std::pair<int, int>>& edgePoints)
 {
 	cv::Mat perimeterImg;
 	regionIn.copyTo(perimeterImg);
+	edgePoints.clear();
 
 	// Iterating through the image
 	for (int rowIndex = 0; rowIndex < regionIn.rows; rowIndex++)
@@ -162,32 +160,59 @@ cv::Mat Region::FindPerimeter(const cv::Mat &regionIn)
 				bool edge = false;
 				for (int i = 0; i < 8; ++i)
 				{
-					cv::Point estimating_point = center + m_PointShift2D[i];
+					cv::Point estimatingPoint = center + m_PointShift2D[i];
 
 					// Checking if inside the image
-					if (estimating_point.x < 0
-						|| estimating_point.x > regionIn.cols - 1
-						|| estimating_point.y < 0
-						|| estimating_point.y > regionIn.rows - 1)
+					if ( !isPixelInImage(regionIn, estimatingPoint) )
 					{
 						edge = true;
-						i = 8;
+						break;
 					}
 					else
 					{
-						if (centerValue != regionIn.at<uchar>(estimating_point))
+						if (centerValue != regionIn.at<uchar>(estimatingPoint))
 						{
 							edge = true;
-							i = 8;
+							break;
 						}
 					}
 				}
 				if (!edge)
+				{
+					// If not on edge, setting value to zero
 					perimeterImg.at<uchar>(center) = 0;
+				}
+				else
+				{
+					// If on edge, value remains 1, and coordinates are added edge vector
+					edgePoints.push_back(std::pair<int,int>(columnIndex, rowIndex));
+				}
 			}
 		}
 	}
 	return perimeterImg;
+}
+
+void Region::smoothPerimeter(std::vector<std::pair<int, int>>& edgePoints)
+{
+	Curve* curve = new Bezier();
+
+	for (auto it = edgePoints.begin(); it != edgePoints.end(); ++it)
+	{
+		curve->add_way_point(Vector((*it).first, (*it).second, 0));
+	}
+
+	edgePoints.clear();
+
+	std::cout << "nodes: " << curve->node_count() << std::endl;
+	std::cout << "total length: " << curve->total_length() << std::endl;
+
+	
+	for (int i = 0; i < curve->node_count(); ++i) {
+		std::cout << "node #" << i << ": " << curve->node(i).toString() << " (length so far: " << curve->length_from_starting_point(i) << ")" << std::endl;
+		edgePoints.push_back(std::pair<int, int>(curve->node(i).x, curve->node(i).y));
+	}
+	delete curve;
 }
 
 double Region::distanceAngle(const cv::Vec3b p1b, const cv::Vec3b p2b)
