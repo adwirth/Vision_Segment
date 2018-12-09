@@ -14,6 +14,9 @@ https://uwspace.uwaterloo.ca/bitstream/handle/10012/937/swesolko1999.pdf?sequenc
 https://github.com/imLogM/multi_seed_region_grow
 * Command line parser by Florian Rappl
 https://github.com/FlorianRappl/CmdParser
+* Longest path on directed acyclic graph
+https://www.geeksforgeeks.org/find-longest-path-directed-acyclic-graph/
+
 
 ## Example commandlines:
 -i images/test2.png -r images/test2r.png -p images/test2o.png -t1 0.001 -t2 0.032 -dim 100 -al 0.5

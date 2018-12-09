@@ -13,12 +13,15 @@
 #pragma once
 
 #include "Region.h"
+#include "RegionUI.h"
 
 class RegionProcess
 {
 public:
 
-	RegionProcess(double aThreshold, double aThreshold2, double aAlpha, int aMaxDimension);
+	RegionProcess(double aThreshold, double aThreshold2, double aAlpha, int aMaxDimension, bool enableUI = true);
+
+	std::tuple<cv::Mat, std::vector<std::pair<int, int>>, cv::Mat> RunCore(const cv::Mat& imgIn, const cv::Point location);
 
 	void Run(const cv::Mat& imgIn,
 			 const cv::Point location,
@@ -28,4 +31,5 @@ public:
 private:
 	Region m_Region;
 	const double m_MaxDimension;			//!< Maximum image dimension
+	RegionUI m_RegionUI;
 };

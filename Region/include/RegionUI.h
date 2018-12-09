@@ -13,9 +13,15 @@
 
 #include <opencv2/opencv.hpp>
 
-namespace RegionUI
+class RegionUI
 {
+public:
+	RegionUI(bool enable = true);
+
 	void DisplayImage(cv::Mat image, std::string windowName);
 
 	cv::Point DisplayImageSelectPixel(cv::Mat image, std::string windowName);
+
+private:
+	bool m_Enabled;
 };

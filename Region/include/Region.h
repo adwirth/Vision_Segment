@@ -14,6 +14,7 @@
 #pragma once
 
 #include <opencv2/opencv.hpp>
+#include "Graph.h"
 #include <vector>
 
  //! \brief Region segmentation class
@@ -59,4 +60,7 @@ private:
 
 	//! \brief Calculate lightness value of pixel
 	double Region::lightness(const cv::Vec3b pb);
+
+	//! \brief Build graph from edge vector
+	Graph buildDAG(std::vector<std::pair<int, int>> edgePoints);
 };

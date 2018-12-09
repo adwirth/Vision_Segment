@@ -12,6 +12,7 @@
 
 #include "Region.h"
 #include "Bezier.h"
+#include "Graph.h"
 #include <stack>
 
 Region::Region( double aThreshold, double aThreshold2, double aAlpha ):
@@ -237,4 +238,9 @@ double Region::lightness(const cv::Vec3b pb)
 	double mi = std::min(p1[0], std::min(p1[1], p1[2]));
 	double ma = std::max(p1[0], std::max(p1[1], p1[2]));
 	return (ma + mi) / 2. / 255.;
+}
+
+Graph Region::buildDAG(std::vector<std::pair<int, int>> edgePoints)
+{
+	return Graph(8);
 }
