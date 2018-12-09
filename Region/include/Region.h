@@ -28,10 +28,14 @@ public:
 	cv::Mat findRegion(const cv::Mat &imgIn, const cv::Point location);
 
 	//! \brief Perimeter detection function
-	cv::Mat findPerimeter(const cv::Mat &regionIn, std::vector<std::pair<int, int>>& edgePoints);
+	cv::Mat findPerimeter(const cv::Mat &regionIn, std::vector<std::vector<std::pair<int, int>>>& contours);
 
 	//! \brief Smooth perimeter function
 	void smoothPerimeter(std::vector<std::pair<int, int>>& edgePoints);
+
+	//! \brief Performs median filtering
+	void medianFiltering(cv::Mat & image, const int kernelSize);
+
 
 private:
 

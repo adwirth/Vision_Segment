@@ -19,7 +19,7 @@ class RegionProcess
 {
 public:
 
-	RegionProcess(double aThreshold, double aThreshold2, double aAlpha, int aMaxDimension, bool enableUI = true, bool aSmoothEdge = true);
+	RegionProcess(double aThreshold, double aThreshold2, double aAlpha, int aMaxDimension, bool enableUI = true, bool aSmoothEdge = true, bool aMedian = true);
 
 	std::tuple<cv::Mat, std::vector<std::pair<int, int>>, cv::Mat> RunCore(const cv::Mat& imgIn, const cv::Point location);
 
@@ -33,4 +33,5 @@ private:
 	const double m_MaxDimension;			//!< Maximum image dimension
 	RegionUI m_RegionUI;
 	bool m_SmoothEdge;
+	bool m_Median;
 };

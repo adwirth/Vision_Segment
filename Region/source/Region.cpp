@@ -12,6 +12,7 @@
 
 #include "Region.h"
 #include "Bezier.h"
+#include "RegionIO.h"
 #include <stack>
 
 Region::Region( double aThreshold, double aThreshold2, double aAlpha ):
@@ -142,13 +143,14 @@ cv::Mat Region::findRegion(const cv::Mat &imgIn, const cv::Point location)
 	return regionImg;
 }
 
-cv::Mat Region::findPerimeter(const cv::Mat &regionIn, std::vector<std::pair<int, int>>& edgePoints)
+cv::Mat Region::findPerimeter(const cv::Mat &regionIn, std::vector<std::vector<std::pair<int, int>>>& contours)
 {
 	cv::Mat perimeterImg;
 	regionIn.copyTo(perimeterImg);
-	edgePoints.clear();
+	contours.clear();
+	std::vector<std::pair<int, int>> edgePoints;
 
-	// Iterating through the image
+	// Iterating through the image, finding all edge points
 	for (int rowIndex = 0; rowIndex < regionIn.rows; rowIndex++)
 	{
 		for (int columnIndex = 0; columnIndex < regionIn.cols; columnIndex++)
@@ -191,50 +193,75 @@ cv::Mat Region::findPerimeter(const cv::Mat &regionIn, std::vector<std::pair<int
 		}
 	}
 
-	std::vector<std::pair<int, int>> edgePointsClean;
-	for (int c = 0; c < edgePoints.size(); ++c)
+	if (edgePoints.size() > 1)
 	{
-		std::pair<int, int> center = edgePoints[c];
-		std::vector<std::pair<int, int>> neighbors = neighborPoints(edgePoints, center);
-		if (neighbors.size() > 1)
+		// Removing points from edge with only a single neighbor
+		std::vector<std::pair<int, int>> edgePointsClean;
+		for (int c = 0; c < edgePoints.size(); ++c)
 		{
-			edgePointsClean.push_back(center);
+			std::pair<int, int> center = edgePoints[c];
+			std::vector<std::pair<int, int>> neighbors = neighborPoints(edgePoints, center);
+			if (neighbors.size() > 1)
+			{
+				edgePointsClean.push_back(center);
+			}
+		}
+
+		// Disecting edgepoints into multiple contours
+		if (edgePointsClean.size() > 1)
+		{
+			std::vector<bool> checkedPoints(edgePointsClean.size(), false);
+			
+			edgePoints.clear();
+
+			// Starting from a point from the edge
+			for (int e = 0; e < edgePointsClean.size(); ++e)
+			{
+				// If it hasn't been walked through yet
+				if (!checkedPoints[e])
+				{
+					std::pair<int, int> center = edgePointsClean[0];
+
+					std::vector<std::pair<int, int>> prox;
+					prox.push_back(std::pair<int, int>(1, 0));
+					prox.push_back(std::pair<int, int>(0, 1));
+					prox.push_back(std::pair<int, int>(-1, 0));
+					prox.push_back(std::pair<int, int>(0, -1));
+
+					// Walking through a single contour
+					std::vector<std::pair<int, int>> singleContour;
+					
+					bool cont = true;
+					while (cont)
+					{
+						int c = (int)std::distance(edgePointsClean.begin(), std::find(edgePointsClean.begin(), edgePointsClean.end(), center));
+						singleContour.push_back(edgePointsClean[c]);
+						checkedPoints[c] = true;
+
+						for (int i = 0; i < 4; ++i)
+						{
+							std::pair<int, int> current(center.first + prox[i].first, center.second + prox[i].second);
+							int p = (int)std::distance(edgePointsClean.begin(), std::find(edgePointsClean.begin(), edgePointsClean.end(), current));
+							if (p < edgePointsClean.size() && !checkedPoints[p])
+							{
+								center = current;
+								break;
+							}
+							if (i == 3)
+							{
+								cont = false;
+							}
+						}
+					}
+					contours.push_back(singleContour);
+				}
+			}
 		}
 	}
 
-	std::vector<bool> checkedPoints(edgePoints.size(), false);
-	edgePoints.clear();
-	
-	std::pair<int, int> center = edgePointsClean[0];
-	
-	std::vector<std::pair<int, int>> prox;
-	prox.push_back(std::pair<int, int>(1, 0));
-	prox.push_back(std::pair<int, int>(0, 1));
-	prox.push_back(std::pair<int, int>(-1, 0));
-	prox.push_back(std::pair<int, int>(0, -1));
-
-	bool cont = true;
-	while (cont)
+	if (contours.size() == 0)
 	{
-		int c = (int)std::distance(edgePointsClean.begin(), std::find(edgePointsClean.begin(), edgePointsClean.end(), center));
-		edgePoints.push_back(edgePointsClean[c]);
-		checkedPoints[c] = true;
-		std::vector<std::pair<int, int>> neighbors = neighborPoints(edgePointsClean, center);
-
-		for (int i = 0; i < 4; ++i)
-		{
-			std::pair<int, int> current(center.first + prox[i].first, center.second + prox[i].second);
-			int p = (int)std::distance(edgePointsClean.begin(), std::find(edgePointsClean.begin(), edgePointsClean.end(), current));
-			if (p < edgePointsClean.size() && !checkedPoints[p])
-			{
-				center = current;
-				break;
-			}
-			if (i == 3)
-			{
-				cont = false;
-			}
-		}
+		contours.push_back(edgePoints);
 	}
 
 	return perimeterImg;
@@ -244,30 +271,41 @@ void Region::smoothPerimeter(std::vector<std::pair<int, int>>& edgePoints)
 {
 	std::vector<std::pair<int, int>> edgePointsSmooth;
 
-	for (int i = 0; i < edgePoints.size(); ++i)
+	// Performs moving average
+	if (edgePoints.size() > 10)
 	{
-		double xS = 0., yS = 0., w = 0.;
-		for (int k = -10; k <= 10; ++k)
-		{ 
-			int index = i + k;
-			if (index < 0)
+		for (int i = 0; i < edgePoints.size(); ++i)
+		{
+			double xS = 0., yS = 0., w = 0.;
+			for (int k = -5; k <= 5; ++k)
 			{
-				index = index + edgePoints.size();
+				int index = i + k;
+				if (index < 0)
+				{
+					index += (int)edgePoints.size();
 
+				}
+				else if (index >= edgePoints.size())
+				{
+					index -= (int)edgePoints.size();
+				}
+				xS += edgePoints[index].first;
+				yS += edgePoints[index].second;
+				w += 1.;
 			}
-			else if (index >= edgePoints.size())
-			{
-				index -= edgePoints.size();
-			}
-			xS += edgePoints[index].first;
-			yS += edgePoints[index].second;
-			w += 1.;
+			edgePointsSmooth.push_back(std::pair<int, int>((int)(xS / w), int(yS / w)));
 		}
-		edgePointsSmooth.push_back(std::pair<int, int>((int)(xS / w), int(yS / w)));
 	}
+	else
+	{
+		edgePointsSmooth = edgePoints;
+	}
+	RegionIO::SaveVectorToImage(edgePoints, 4032, 3024, "test.png");
+
+	RegionIO::SaveVectorToImage(edgePointsSmooth, 4032, 3024, "test2.png");
 
 	Curve* curve = new Bezier();
-	curve->set_steps(100);
+	curve->set_steps(1000);
 
 	for (auto it = edgePointsSmooth.begin(); it != edgePointsSmooth.end(); ++it)
 	{
@@ -277,8 +315,6 @@ void Region::smoothPerimeter(std::vector<std::pair<int, int>>& edgePoints)
 
 	edgePoints.clear();
 
-	//std::cout << "nodes: " << curve->node_count() << std::endl;
-	//std::cout << "total length: " << curve->total_length() << std::endl;
 		
 	for (int i = 0; i < curve->node_count(); ++i)
 	{
@@ -327,4 +363,56 @@ std::vector<std::pair<int, int>> Region::neighborPoints(const std::vector<std::p
 		}
 	}
 	return neighbors;
+}
+
+
+// Median filter by Efstathios Chatzikyriakidis
+// https://efxa.org/2018/06/25/digital-image-processing-algorithms-implemented-with-c-and-opencv/
+//
+void Region::medianFiltering(cv::Mat & image, const int kernelSize)
+{
+	cv::Mat tempImage;
+
+	image.copyTo(tempImage);
+
+	int imageChannels = image.channels();
+
+	std::vector<std::vector<int>> values(imageChannels);
+
+	int halfSize{ kernelSize / 2 };
+
+	int pos = { kernelSize * kernelSize / 2 };
+
+	for (int i{ halfSize }; i < tempImage.rows - halfSize; i++)
+	{
+		for (int j{ halfSize }; j < tempImage.cols - halfSize; j++)
+		{
+			for (int channel = 0; channel < imageChannels; channel++)
+			{
+				values[channel].clear();
+			}
+
+			for (int x = { -halfSize }; x <= halfSize; x++)
+			{
+				for (int y = { -halfSize }; y <= halfSize; y++)
+				{
+					for (int channel = 0; channel < imageChannels; channel++)
+					{
+						unsigned char * pixelValuePtr = tempImage.ptr(i + x) + ((j + y) * imageChannels) + channel;
+
+						values[channel].push_back(*pixelValuePtr);
+					}
+				}
+			}
+
+			for (int channel = 0; channel < imageChannels; channel++)
+			{
+				sort(begin(values[channel]), end(values[channel]));
+
+				unsigned char * pixelValuePtr = image.ptr(i) + (j * imageChannels) + channel;
+
+				*pixelValuePtr = values[channel][pos];
+			}
+		}
+	}
 }
