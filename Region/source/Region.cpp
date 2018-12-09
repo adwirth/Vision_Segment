@@ -12,7 +12,6 @@
 
 #include "Region.h"
 #include "Bezier.h"
-#include "Graph.h"
 #include <stack>
 
 Region::Region( double aThreshold, double aThreshold2, double aAlpha ):
@@ -191,6 +190,53 @@ cv::Mat Region::findPerimeter(const cv::Mat &regionIn, std::vector<std::pair<int
 			}
 		}
 	}
+
+	std::vector<std::pair<int, int>> edgePointsClean;
+	for (int c = 0; c < edgePoints.size(); ++c)
+	{
+		std::pair<int, int> center = edgePoints[c];
+		std::vector<std::pair<int, int>> neighbors = neighborPoints(edgePoints, center);
+		if (neighbors.size() > 1)
+		{
+			edgePointsClean.push_back(center);
+		}
+	}
+
+	std::vector<bool> checkedPoints(edgePoints.size(), false);
+	edgePoints.clear();
+	
+	std::pair<int, int> center = edgePointsClean[0];
+	
+	std::vector<std::pair<int, int>> prox;
+	prox.push_back(std::pair<int, int>(1, 0));
+	prox.push_back(std::pair<int, int>(0, 1));
+	prox.push_back(std::pair<int, int>(-1, 0));
+	prox.push_back(std::pair<int, int>(0, -1));
+
+	bool cont = true;
+	while (cont)
+	{
+		int c = (int)std::distance(edgePointsClean.begin(), std::find(edgePointsClean.begin(), edgePointsClean.end(), center));
+		edgePoints.push_back(edgePointsClean[c]);
+		checkedPoints[c] = true;
+		std::vector<std::pair<int, int>> neighbors = neighborPoints(edgePointsClean, center);
+
+		for (int i = 0; i < 4; ++i)
+		{
+			std::pair<int, int> current(center.first + prox[i].first, center.second + prox[i].second);
+			int p = (int)std::distance(edgePointsClean.begin(), std::find(edgePointsClean.begin(), edgePointsClean.end(), current));
+			if (p < edgePointsClean.size() && !checkedPoints[p])
+			{
+				center = current;
+				break;
+			}
+			if (i == 3)
+			{
+				cont = false;
+			}
+		}
+	}
+
 	return perimeterImg;
 }
 
@@ -200,18 +246,17 @@ void Region::smoothPerimeter(std::vector<std::pair<int, int>>& edgePoints)
 
 	for (auto it = edgePoints.begin(); it != edgePoints.end(); ++it)
 	{
-		curve->add_way_point(Vector((*it).first, (*it).second, 0));
+		curve->add_way_point(Vector(it->first, it->second, 0));
 	}
 
 	edgePoints.clear();
 
-	std::cout << "nodes: " << curve->node_count() << std::endl;
-	std::cout << "total length: " << curve->total_length() << std::endl;
-
-	
+	//std::cout << "nodes: " << curve->node_count() << std::endl;
+	//std::cout << "total length: " << curve->total_length() << std::endl;
+		
 	for (int i = 0; i < curve->node_count(); ++i) {
-		std::cout << "node #" << i << ": " << curve->node(i).toString() << " (length so far: " << curve->length_from_starting_point(i) << ")" << std::endl;
-		edgePoints.push_back(std::pair<int, int>(curve->node(i).x, curve->node(i).y));
+		//std::cout << "node #" << i << ": " << curve->node(i).toString() << " (length so far: " << curve->length_from_starting_point(i) << ")" << std::endl;
+		edgePoints.push_back(std::pair<int, int>((int)curve->node(i).x, (int)curve->node(i).y));
 	}
 	delete curve;
 }
@@ -240,7 +285,19 @@ double Region::lightness(const cv::Vec3b pb)
 	return (ma + mi) / 2. / 255.;
 }
 
-Graph Region::buildDAG(std::vector<std::pair<int, int>> edgePoints)
+std::vector<std::pair<int, int>> Region::neighborPoints(const std::vector<std::pair<int, int>>& edgePoints, std::pair<int, int> center)
 {
-	return Graph(8);
+	std::vector<std::pair<int, int>> neighbors;
+
+	for (auto it = edgePoints.begin(); it != edgePoints.end(); ++it)
+	{
+		int x = it->first;
+		int y = it->second;
+		if ((abs(x - center.first) == 1 && abs(y - center.second) == 0) ||
+			(abs(x - center.first) == 0 && abs(y - center.second) == 1))
+		{
+			neighbors.push_back(*it);
+		}
+	}
+	return neighbors;
 }

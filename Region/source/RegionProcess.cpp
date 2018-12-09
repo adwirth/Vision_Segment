@@ -59,16 +59,21 @@ std::tuple<cv::Mat, std::vector<std::pair<int, int>>, cv::Mat> RegionProcess::Ru
 	std::vector<std::pair<int, int>> edgePoints;
 	cv::Mat perimeterImage = m_Region.findPerimeter(regionImg, edgePoints);
 
-	// Smooth perimeter
-	m_Region.smoothPerimeter(edgePoints);
-
 	// Resizing back to original resolution
 	if (scale < 1)
 	{
 		double scaleB = 1. / scale;
 		cv::resize(regionImg, regionImg, cv::Size(0, 0), scaleB, scaleB);
 		cv::resize(perimeterImage, perimeterImage, cv::Size(0, 0), scaleB, scaleB);
+		for (auto it = edgePoints.begin(); it != edgePoints.end(); ++it)
+		{
+			it->first *= scaleB;
+			it->second *= scaleB;
+		}
 	}
+
+	// Smooth perimeter
+	m_Region.smoothPerimeter(edgePoints);
 
 	// Displaying results
 	m_RegionUI.DisplayImage(regionImg, "Region");

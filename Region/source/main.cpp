@@ -65,6 +65,11 @@ int main(int argc, char *argv[])
 		point.x = location[0];
 		point.y = location[1];
 	}
+	else
+	{
+		point.x = -1;
+		point.y = -1;
+	}
 
 	region.Run(image, point, outputRegionPath, outputPerimeterPath);
 
