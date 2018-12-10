@@ -18,14 +18,17 @@ https://github.com/FlorianRappl/CmdParser
 https://www.geeksforgeeks.org/find-longest-path-directed-acyclic-graph/
 * Median filter by Efstathios Chatzikyriakidis
 https://efxa.org/2018/06/25/digital-image-processing-algorithms-implemented-with-c-and-opencv/
+* Curve fitting by Xianshun Chen
+https://github.com/chen0040/cpp-spline
 
-
+## Algorithm
+The Region module provides capabilities for segmenting and contouring regions on RGB images. Before segmentation an optional median filter is applied. The segmentation is based on a region growing algorithm with a similarity function using both color vector angle and lightness distances. The edge detection uses the segmented region, and then optionally performs average filtering and Bezier curve fitting on the resulting contours.
 
 ## Example commandlines:
--i images/test2.png -r images/test2r.png -p images/test2o.png -t1 0.001 -t2 0.032 -dim 100 -al 0.5 -ui -se -med
--i images/test3.png -r images/test3r.png -p images/test3o.png -t1 0.001 -t2 0.032 -dim 100 -al 0.5 -ui -se -med
--i images/test4.jpg -r images/test4r.jpg -p images/test4o.jpg -t1 0.001 -t2 0.032 -dim 100 -al 0.5 -ui -se -med
--i images/yesthisfileiscorrupt.png -r images/test4r.jpg -p images/test4o.jpg -t1 0.001 -t2 0.032 -dim 100 -al 0.5 -ui
+-i images/test2.png -r images/test2r.png -p images/test2o.png -t1 0.001 -t2 0.032 -dim 100 -al 0.5 -ui -se -med -avg 5
+-i images/test3.png -r images/test3r.png -p images/test3o.png -t1 0.001 -t2 0.032 -dim 100 -al 0.5 -ui -se -med -avg 5
+-i images/test4.jpg -r images/test4r.jpg -p images/test4o.jpg -t1 0.001 -t2 0.032 -dim 100 -al 0.5 -ui -se -med -avg 5
+-i images/yesthisfileiscorrupt.png -r images/test4r.jpg -p images/test4o.jpg -t1 0.001 -t2 0.032 -dim 100 -al 0.5 -ui -avg 5
 
 ## Algorithm notes
 * Region grow could easily provide the perimeter too, but that would compromise modularity: in case of using other region segmentation methods (like clustering) we would still need a separate edge detection method.
@@ -34,7 +37,6 @@ https://efxa.org/2018/06/25/digital-image-processing-algorithms-implemented-with
 ## TODO
 * Smooth image before segmentation
 * Adjust contrast before segmentation
-* Edge detection
 * Test cases
 * Error handling
 * Algorithm description
