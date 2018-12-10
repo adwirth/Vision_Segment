@@ -15,7 +15,7 @@
 #include "RegionIO.h"
 #include <stack>
 
-Region::Region( double aThreshold, double aThreshold2, double aAlpha ):
+Region::Region( double aThreshold, double aThreshold2, double aAlpha):
 	m_Threshold(aThreshold),
 	m_Threshold2(aThreshold2),
 	m_Alpha(aAlpha),
@@ -220,7 +220,7 @@ cv::Mat Region::findPerimeter(const cv::Mat &regionIn, std::vector<std::vector<s
 				// If it hasn't been walked through yet
 				if (!checkedPoints[e])
 				{
-					std::pair<int, int> center = edgePointsClean[0];
+					std::pair<int, int> center = edgePointsClean[e];
 
 					std::vector<std::pair<int, int>> prox;
 					prox.push_back(std::pair<int, int>(1, 0));
@@ -267,27 +267,22 @@ cv::Mat Region::findPerimeter(const cv::Mat &regionIn, std::vector<std::vector<s
 	return perimeterImg;
 }
 
-void Region::smoothPerimeter(std::vector<std::pair<int, int>>& edgePoints)
+void Region::smoothPerimeter(std::vector<std::pair<int, int>>& edgePoints, int edgeAverageKernel)
 {
 	std::vector<std::pair<int, int>> edgePointsSmooth;
-
+	int limit = (edgeAverageKernel - 1) / 2;
 	// Performs moving average
-	if (edgePoints.size() > 10)
+	if (edgePoints.size() > edgeAverageKernel)
 	{
 		for (int i = 0; i < edgePoints.size(); ++i)
 		{
 			double xS = 0., yS = 0., w = 0.;
-			for (int k = -5; k <= 5; ++k)
+			for (int k = -limit; k <= limit; ++k)
 			{
-				int index = i + k;
+				int index = (i + k) % (int)edgePoints.size();
 				if (index < 0)
 				{
 					index += (int)edgePoints.size();
-
-				}
-				else if (index >= edgePoints.size())
-				{
-					index -= (int)edgePoints.size();
 				}
 				xS += edgePoints[index].first;
 				yS += edgePoints[index].second;
@@ -300,9 +295,8 @@ void Region::smoothPerimeter(std::vector<std::pair<int, int>>& edgePoints)
 	{
 		edgePointsSmooth = edgePoints;
 	}
-	RegionIO::SaveVectorToImage(edgePoints, 4032, 3024, "test.png");
-
-	RegionIO::SaveVectorToImage(edgePointsSmooth, 4032, 3024, "test2.png");
+	//RegionIO::SaveVectorToImage(edgePoints, 4032, 3024, "test.png");
+	//RegionIO::SaveVectorToImage(edgePointsSmooth, 4032, 3024, "test2.png");
 
 	Curve* curve = new Bezier();
 	curve->set_steps(1000);

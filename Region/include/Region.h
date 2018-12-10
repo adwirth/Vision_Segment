@@ -31,7 +31,7 @@ public:
 	cv::Mat findPerimeter(const cv::Mat &regionIn, std::vector<std::vector<std::pair<int, int>>>& contours);
 
 	//! \brief Smooth perimeter function
-	void smoothPerimeter(std::vector<std::pair<int, int>>& edgePoints);
+	void smoothPerimeter(std::vector<std::pair<int, int>>& edgePoints, int edgeAverageKernel);
 
 	//! \brief Performs median filtering
 	void medianFiltering(cv::Mat & image, const int kernelSize);

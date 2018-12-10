@@ -19,7 +19,7 @@ class RegionProcess
 {
 public:
 
-	RegionProcess(double aThreshold, double aThreshold2, double aAlpha, int aMaxDimension, bool enableUI = true, bool aSmoothEdge = true, bool aMedian = true);
+	RegionProcess(double aThreshold, double aThreshold2, double aAlpha, int aMaxDimension, int edgeAverageKernel, bool enableUI = true, bool aSmoothEdge = true, bool aMedian = true);
 
 	std::tuple<cv::Mat, std::vector<std::pair<int, int>>, cv::Mat> RunCore(const cv::Mat& imgIn, const cv::Point location);
 
@@ -34,4 +34,5 @@ private:
 	RegionUI m_RegionUI;
 	bool m_SmoothEdge;
 	bool m_Median;
+	const int m_EdgeAverageKernel;			//!< Kernel size for edge point average filter 
 };

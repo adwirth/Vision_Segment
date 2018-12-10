@@ -28,6 +28,7 @@ void configure_parser(cli::Parser& parser)
 	parser.set_optional<int>("dim", "maxdimension", 100, "Downscale image to this dimension");
 	parser.set_optional<bool>("se", "smoothedge", false, "Enable edge smoothing.");
 	parser.set_optional<bool>("med", "median", false, "Enable median filtering.");
+	parser.set_optional<int>("avg", "edgeaverage", 5, "Kernel size for edge point average filter.");
 }
 
 int main(int argc, char *argv[])
@@ -47,6 +48,7 @@ int main(int argc, char *argv[])
 	int maxdimension = parser.get<int>("dim");
 	bool smoothedge = parser.get<bool>("se");
 	bool median = parser.get<bool>("med");
+	int edgeaverage = parser.get<int>("avg");
 
 	cv::Mat image;
 	try
@@ -59,7 +61,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 	
-	RegionProcess region(threshold1, threshold2, alpha, maxdimension, uiEnable, smoothedge);
+	RegionProcess region(threshold1, threshold2, alpha, maxdimension, edgeaverage, uiEnable, smoothedge);
 
 	cv::Point point;
 	if (location.size() == 2)

@@ -1,3 +1,16 @@
+/*!
+ * \file
+ * Vector class definition. This file is part of Region module.
+ * Vector class manages vector operations for curve fitting.
+ *
+ * \remarks
+ * Original Vector class by Xianshun Chen.
+ * https://github.com/chen0040/cpp-spline
+ *
+ * \authors
+ * Andras Wirth
+ */
+
 #include "Vector.h"
 #include <cmath>
 #include <sstream>

@@ -1,3 +1,16 @@
+/*!
+ * \file
+ * Bezier class definition. This file is part of Region module.
+ * Bezier class performs bezier curve fitting.
+ *
+ * \remarks
+ * Original Bezier fitting algorithm by Xianshun Chen.
+ * https://github.com/chen0040/cpp-spline
+ *
+ * \authors
+ * Andras Wirth
+ */
+
 #ifndef _H__BEZIER_H
 #define _H__BEZIER_H
 

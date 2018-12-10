@@ -1,3 +1,17 @@
+/*!
+ * \file
+ * Curve class definition. This file is part of Region module.
+ * Curve class manages general curve fitting.
+ *
+ * \remarks
+ * Original Curve fitting class by Xianshun Chen.
+ * https://github.com/chen0040/cpp-spline
+ *
+ * \authors
+ * Andras Wirth
+ */
+
+
 #ifndef _H__CURVE_H
 #define _H__CURVE_H
 
