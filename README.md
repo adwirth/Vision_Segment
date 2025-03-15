@@ -1,4 +1,4 @@
-# exercise-AEO4492
+# Vision Segmentation
 Region growing and edge detection algorithm.
 
 ## Environment
